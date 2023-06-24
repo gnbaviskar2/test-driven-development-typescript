@@ -1,7 +1,5 @@
-import { Application } from 'express';
-import { Server } from 'http';
-
-export interface expressHttpObjType {
-  testApp: Application;
-  httpServer: Server;
+export interface userSaveType {
+  username: string;
+  email: string;
+  password: string;
 }
