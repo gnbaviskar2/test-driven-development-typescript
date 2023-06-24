@@ -1,0 +1,19 @@
+**/node_modules
+node_modules
+
+**/dist
+dist
+
+# ignore test converage
+coverage
+
+# ignore env
+.env
+.env.production
+.env.local
+.env.stage
+.env.development
+.env.qa
+
+# logs skip
+*logs.txt

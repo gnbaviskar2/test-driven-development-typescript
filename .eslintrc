@@ -1,0 +1,50 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint",
+    "no-loops", // adding eslint-plugin-no-loops plugin
+    "prettier"
+  ],
+  "extends": [
+    "airbnb-base",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true
+      }
+    ],
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never", // "import/extensions": "off" issue fix
+        "tsx": "never"
+      }
+    ],
+    "import/no-extraneous-dependencies": ["off"], // TODO: need to resolve it later,
+    "comma-dangle": "off",
+    "implicit-arrow-linebreak": "off",
+    "import/prefer-default-export": "warn",
+    // removing any errors as error type in catch block is always any
+    "@typescript-eslint/no-explicit-any": "off",
+    "operator-linebreak": "off",
+    "no-param-reassign": "off",
+    "object-curly-newline": "off",
+    "arrow-body-style": "off",
+    "no-underscore-dangle": "off" // mongo returns _id
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {} // this loads <rootdir>/tsconfig.json to eslint,
+      // // "import/no-unresolved": "off", issue fix, need to install eslint-import-resolver-typescript
+    }
+  }
+}
