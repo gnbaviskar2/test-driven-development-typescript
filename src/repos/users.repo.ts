@@ -1,7 +1,7 @@
-import { userSaveType } from '../interface';
+import { userSignUpType } from '../interface';
 import prisma from '../database/prisma';
 
-export const userSignUpRepo = (userSavePayload: userSaveType) => {
+export const userSignUpRepo = (userSavePayload: userSignUpType) => {
   return prisma.user.create({
     data: {
       username: userSavePayload.username,

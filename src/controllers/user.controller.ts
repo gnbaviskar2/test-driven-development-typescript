@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import base64 from 'base-64';
 
 import asyncHandler from '../core/handlers/async.handlers';
-import { userSaveType } from '../interface';
+import { userSignUpType } from '../interface';
 import { userSignUpRepo } from '../repos/users.repo';
 import { apiResponseHandler } from '../core/handlers/response.handlers';
 import httpCodes from '../core/constants/http.constant';
@@ -17,7 +17,7 @@ export const getUserController = (req: Request, res: Response) => {
 
 export const saveUserController = asyncHandler(
   async (req: Request, res: Response) => {
-    const userSignUpPayload = req.body as userSaveType;
+    const userSignUpPayload = req.body as userSignUpType;
 
     // decode password
     userSignUpPayload.password = base64.decode(userSignUpPayload.password);
