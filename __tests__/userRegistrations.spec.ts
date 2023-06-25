@@ -205,4 +205,25 @@ describe('User Registration', () => {
     expect(actualBody.message).toBe(expectedMessage);
     expect(actualBody).toHaveProperty('errors');
   });
+
+  it('creates user in inactive mode false', async () => {
+    const userSignUpPayload: userSignUpType = generateUserDetails();
+    const response = await sendUserSignUpReq(userSignUpPayload);
+    const actualBody = response.body as apiResType;
+    expect(actualBody.code).toBe(201);
+    expect(actualBody.success).toBe(true);
+    expect(actualBody).toHaveProperty('data');
+    expect(actualBody.data).toHaveProperty('isActive');
+    expect(actualBody.data.isActive).toBe(false);
+  });
+
+  it('creates user with activation code present', async () => {
+    const userSignUpPayload: userSignUpType = generateUserDetails();
+    const response = await sendUserSignUpReq(userSignUpPayload);
+    const actualBody = response.body as apiResType;
+    expect(actualBody.code).toBe(201);
+    expect(actualBody.success).toBe(true);
+    const actualUser = await getUserByUsername(userSignUpPayload.username);
+    expect(actualUser?.activationCode).toBeDefined();
+  });
 });

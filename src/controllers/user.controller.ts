@@ -51,6 +51,7 @@ export const saveUserController = asyncHandler(
         email: user?.email,
         username: user?.username,
         createdAt: user?.createdAt,
+        isActive: user?.isActive,
       },
       userConstants.userSignUpSuccessful
     );

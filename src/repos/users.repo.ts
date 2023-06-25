@@ -5,6 +5,7 @@ import AppError, {
   ErrorTypes,
 } from '../core/handlers/error.handlers';
 import userConstants from '../core/constants/user.constants';
+import { generateActivationToken } from '../core/helpers/token.helpers';
 
 export const userSignUpRepo = async (userSavePayload: userSignUpType) => {
   try {
@@ -13,6 +14,8 @@ export const userSignUpRepo = async (userSavePayload: userSignUpType) => {
         username: userSavePayload.username,
         email: userSavePayload.email,
         password: userSavePayload.password,
+        activationCode: generateActivationToken(16),
+        isActive: false,
       },
     });
     return user;
