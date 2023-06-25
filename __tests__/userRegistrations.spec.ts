@@ -155,4 +155,54 @@ describe('User Registration', () => {
     expect(actualBody.message).toBe(userConstants.passwordRequired);
     expect(actualBody).toHaveProperty('errors');
   });
+
+  it('throws error when password is null', async () => {
+    // to over write email property undefined marked it as any
+    const uuid = uuidv4();
+    const userSignUpPayload = {
+      username: `johndoe${uuid}`,
+      email: `johndoe${uuid}@yopmail.com`,
+      password: null,
+    };
+    const response = await request(testApp).post('/api/v1/users').send({
+      username: userSignUpPayload.username,
+      email: userSignUpPayload.email,
+    });
+    const actualBody = response.body;
+    expect(actualBody.name).toBe(ErrorTypes.BadRequestError);
+    expect(actualBody.message).toBe(userConstants.passwordRequired);
+    expect(actualBody).toHaveProperty('errors');
+  });
+
+  // dynamic test cases
+  it.each([
+    ['username', '"username" must be a string'],
+    ['password', '"password" must be a string'],
+    ['email', '"email" must be a string'],
+  ])('when %s is null %s is received', async (field, expectedMessage) => {
+    const uuid = uuidv4();
+    const userPayload: any = {
+      username: `johndoe${uuid}`,
+      email: `johndoe${uuid}@yopmail.com`,
+      password: encode('samplePassword@123%$'),
+    };
+    if (field === 'username') {
+      userPayload.username = null;
+    }
+    if (field === 'password') {
+      userPayload.password = null;
+    }
+    if (field === 'email') {
+      userPayload.email = null;
+    }
+    const response = await request(testApp).post('/api/v1/users').send({
+      username: userPayload.username,
+      email: userPayload.email,
+      password: userPayload.password,
+    });
+    const actualBody = response.body;
+    expect(actualBody.name).toBe(ErrorTypes.BadRequestError);
+    expect(actualBody.message).toBe(expectedMessage);
+    expect(actualBody).toHaveProperty('errors');
+  });
 });
