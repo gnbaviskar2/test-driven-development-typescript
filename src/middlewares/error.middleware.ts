@@ -8,11 +8,11 @@ const errorFormatter = (
 ) => {
   if (error) {
     // // format the error
-    res.status(error.httpCode || 500).json({
+    res.status(error.httpCode ? error.httpCode : 500).json({
       name: error.name,
       success: false,
       code: error.httpCode,
-      message: error.message || 'Something is wrong',
+      message: error.message ? error.message : 'Something is wrong',
       isOperational: error.isOperational,
       errors: [
         {
