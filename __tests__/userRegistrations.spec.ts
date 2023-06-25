@@ -21,6 +21,16 @@ describe('User Registration', () => {
       });
   };
 
+  const sendUserSignUpReqWithoutEncoding = (
+    userSignUpPayload: userSignUpType
+  ) => {
+    return request(testApp).post('/api/v1/users').send({
+      username: userSignUpPayload.username,
+      email: userSignUpPayload.email,
+      password: userSignUpPayload.password,
+    });
+  };
+
   const generateUserDetails = () => {
     const uuid = uuidv4();
     return {
@@ -41,12 +51,12 @@ describe('User Registration', () => {
   it('returns success message when signup request is valid', (done) => {
     const userSignUpPayload: userSignUpType = generateUserDetails();
     sendUserSignUpReq(userSignUpPayload).then((response) => {
-      const responseBody = response.body as apiResType;
-      expect(responseBody.code).toBe(201);
-      expect(responseBody.success).toBe(true);
-      expect(responseBody).toHaveProperty('message');
-      expect(responseBody.message).toBe(userConstants.userSignUpSuccessful);
-      expect(responseBody).toHaveProperty('data');
+      const actualBody = response.body as apiResType;
+      expect(actualBody.code).toBe(201);
+      expect(actualBody.success).toBe(true);
+      expect(actualBody).toHaveProperty('message');
+      expect(actualBody.message).toBe(userConstants.userSignUpSuccessful);
+      expect(actualBody).toHaveProperty('data');
       done();
     });
   });
@@ -54,8 +64,8 @@ describe('User Registration', () => {
   it('saves the user in database', (done) => {
     const userSignUpPayload: userSignUpType = generateUserDetails();
     sendUserSignUpReq(userSignUpPayload).then(async (_response) => {
-      const user = await getUserByUsername(userSignUpPayload.username);
-      expect(user).toBeDefined();
+      const actualUser = await getUserByUsername(userSignUpPayload.username);
+      expect(actualUser).toBeDefined();
       done();
     });
   });
@@ -63,9 +73,9 @@ describe('User Registration', () => {
   it('saves the username and email in database', (done) => {
     const userSignUpPayload: userSignUpType = generateUserDetails();
     sendUserSignUpReq(userSignUpPayload).then(async (_response) => {
-      const user = await getUserByUsername(userSignUpPayload.username);
-      expect(user?.username).toBe(userSignUpPayload.username);
-      expect(user?.email).toBe(userSignUpPayload.email);
+      const actualUser = await getUserByUsername(userSignUpPayload.username);
+      expect(actualUser?.username).toBe(userSignUpPayload.username);
+      expect(actualUser?.email).toBe(userSignUpPayload.email);
       done();
     });
   });
@@ -73,10 +83,23 @@ describe('User Registration', () => {
   it('hashes the password in database', (done) => {
     const userSignUpPayload: userSignUpType = generateUserDetails();
     sendUserSignUpReq(userSignUpPayload).then(async (response) => {
-      const user = await getUserByUsername(userSignUpPayload.username);
-      expect(user?.password).not.toBe(decode(userSignUpPayload.password));
-      expect(user?.password).not.toBe(encode(userSignUpPayload.password));
+      const actualUser = await getUserByUsername(userSignUpPayload.username);
+      expect(actualUser?.password).not.toBe(decode(userSignUpPayload.password));
+      expect(actualUser?.password).not.toBe(encode(userSignUpPayload.password));
       done();
     });
+  });
+
+  it('throws error when password is not encoded', (done) => {
+    const userSignUpPayload: userSignUpType = generateUserDetails();
+    userSignUpPayload.password = 'Admin@123';
+    sendUserSignUpReqWithoutEncoding(userSignUpPayload).then(
+      async (response) => {
+        const actualBody = response.body;
+        expect(actualBody.name).toBe('InvalidCharacterError');
+        expect(actualBody).toHaveProperty('errors');
+        done();
+      }
+    );
   });
 });
