@@ -12,7 +12,7 @@ const errorFormatter = (
       name: error.name,
       success: false,
       code: error.httpCode,
-      message: error.description || 'Something is wrong',
+      message: error.message || 'Something is wrong',
       isOperational: error.isOperational,
       errors: [
         {

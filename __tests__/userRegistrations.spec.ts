@@ -7,6 +7,7 @@ import { apiResType } from '../src/core/handlers/response.handlers';
 import userConstants from '../src/core/constants/user.constants';
 import { getUserByUsername } from '../src/repos/users.repo';
 import { userSignUpType } from '../src/interface';
+import { ErrorTypes } from '../src/core/handlers/error.handlers';
 
 const testApp = serverInit();
 
@@ -88,6 +89,70 @@ describe('User Registration', () => {
     const response = await sendUserSignUpReqWithoutEncoding(userSignUpPayload);
     const actualBody = response.body;
     expect(actualBody.name).toBe('InvalidCharacterError');
+    expect(actualBody).toHaveProperty('errors');
+  });
+
+  it('throws error when username is already registered', async () => {
+    const userSignUpPayload: userSignUpType = generateUserDetails();
+    userSignUpPayload.password = 'Admin@123';
+    await sendUserSignUpReq(userSignUpPayload);
+    const response = await sendUserSignUpReq(userSignUpPayload);
+    const actualBody = response.body;
+    expect(actualBody.name).toBe(ErrorTypes.BadRequestError);
+    expect(actualBody.message).toBe(userConstants.usernameAlreadyRegistered);
+    expect(actualBody).toHaveProperty('errors');
+  });
+
+  it('throws error when email is already registered', async () => {
+    const userSignUpPayload: userSignUpType = generateUserDetails();
+    userSignUpPayload.password = 'Admin@123';
+    await sendUserSignUpReq(userSignUpPayload);
+    userSignUpPayload.username = uuidv4();
+    const response = await sendUserSignUpReq(userSignUpPayload);
+    const actualBody = response.body;
+    expect(actualBody.name).toBe(ErrorTypes.BadRequestError);
+    expect(actualBody.message).toBe(userConstants.emailAlreadyRegistered);
+    expect(actualBody).toHaveProperty('errors');
+  });
+
+  it('throws error when email is not provided', async () => {
+    // to over write email property undefined marked it as any
+    const userSignUpPayload = generateUserDetails() as any;
+    userSignUpPayload.email = undefined;
+    userSignUpPayload.username = uuidv4();
+    const response = await sendUserSignUpReq(userSignUpPayload);
+    const actualBody = response.body;
+    expect(actualBody.name).toBe(ErrorTypes.BadRequestError);
+    expect(actualBody.message).toBe(userConstants.emailRequired);
+    expect(actualBody).toHaveProperty('errors');
+  });
+
+  it('throws error when username is not provided', async () => {
+    // to over write email property undefined marked it as any
+    const userSignUpPayload = generateUserDetails() as any;
+    userSignUpPayload.username = undefined;
+    userSignUpPayload.email = uuidv4();
+    const response = await sendUserSignUpReq(userSignUpPayload);
+    const actualBody = response.body;
+    expect(actualBody.name).toBe(ErrorTypes.BadRequestError);
+    expect(actualBody.message).toBe(userConstants.usernameRequired);
+    expect(actualBody).toHaveProperty('errors');
+  });
+
+  it('throws error when password is not provided', async () => {
+    // to over write email property undefined marked it as any
+    const uuid = uuidv4();
+    const userSignUpPayload = {
+      username: `johndoe${uuid}`,
+      email: `johndoe${uuid}@yopmail.com`,
+    };
+    const response = await request(testApp).post('/api/v1/users').send({
+      username: userSignUpPayload.username,
+      email: userSignUpPayload.email,
+    });
+    const actualBody = response.body;
+    expect(actualBody.name).toBe(ErrorTypes.BadRequestError);
+    expect(actualBody.message).toBe(userConstants.passwordRequired);
     expect(actualBody).toHaveProperty('errors');
   });
 });

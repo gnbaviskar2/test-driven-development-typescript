@@ -8,10 +8,24 @@ export const enum HttpCodeEnum {
   INTERNAL_SERVER_ERROR = 500,
 }
 
+// eslint-disable-next-line no-shadow
+export const enum ErrorTypes {
+  AuthFailureError = 'AuthFailureError',
+  InternalError = 'InternalError',
+  BadRequestError = 'BadRequestError',
+  NotFoundError = 'NotFoundError',
+  ForbiddenError = 'ForbiddenError',
+  NoEntryError = 'NoEntryError',
+  BadTokenError = 'BadTokenError',
+  TokenExpiredError = 'TokenExpiredError',
+  NoDataError = 'NoDataError',
+  AccessTokenError = 'AccessTokenError',
+}
+
 interface AppErrorArgs {
   name?: string;
   httpCode: HttpCodeEnum;
-  description: string;
+  message: string;
   isOperational?: boolean;
 }
 
@@ -23,11 +37,11 @@ export default class AppError extends Error {
   public readonly isOperational: boolean = true;
 
   constructor(args: AppErrorArgs) {
-    super(args.description);
+    super(args.message);
 
     Object.setPrototypeOf(this, new.target.prototype);
 
-    this.name = args.name || 'Failed';
+    this.name = args.name ? args.name : 'Failed';
     this.httpCode = args.httpCode;
 
     if (args.isOperational !== undefined) {

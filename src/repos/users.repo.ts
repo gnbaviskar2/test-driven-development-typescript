@@ -1,14 +1,43 @@
 import { userSignUpType } from '../interface';
 import prisma from '../database/prisma';
+import AppError, {
+  HttpCodeEnum,
+  ErrorTypes,
+} from '../core/handlers/error.handlers';
+import userConstants from '../core/constants/user.constants';
 
-export const userSignUpRepo = (userSavePayload: userSignUpType) => {
-  return prisma.user.create({
-    data: {
-      username: userSavePayload.username,
-      email: userSavePayload.email,
-      password: userSavePayload.password,
-    },
-  });
+export const userSignUpRepo = async (userSavePayload: userSignUpType) => {
+  try {
+    const user = await prisma.user.create({
+      data: {
+        username: userSavePayload.username,
+        email: userSavePayload.email,
+        password: userSavePayload.password,
+      },
+    });
+    return user;
+  } catch (e: any) {
+    if (e.code === 'P2002') {
+      if (e.message.includes('username')) {
+        throw new AppError({
+          httpCode: HttpCodeEnum.BAD_REQUEST,
+          message: userConstants.usernameAlreadyRegistered,
+          name: ErrorTypes.BadRequestError,
+        });
+      } else if (e.message.includes('email')) {
+        throw new AppError({
+          httpCode: HttpCodeEnum.BAD_REQUEST,
+          message: userConstants.emailAlreadyRegistered,
+          name: ErrorTypes.BadRequestError,
+        });
+      }
+    }
+    throw new AppError({
+      httpCode: HttpCodeEnum.INTERNAL_SERVER_ERROR,
+      message: 'Could not create user',
+      name: ErrorTypes.InternalError,
+    });
+  }
 };
 
 export const getUserByEmail = (email: string) => {
