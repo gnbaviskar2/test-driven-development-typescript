@@ -48,58 +48,46 @@ describe('User Registration', () => {
     });
   });
 
-  it('returns success message when signup request is valid', (done) => {
+  it('returns success message when signup request is valid', async () => {
     const userSignUpPayload: userSignUpType = generateUserDetails();
-    sendUserSignUpReq(userSignUpPayload).then((response) => {
-      const actualBody = response.body as apiResType;
-      expect(actualBody.code).toBe(201);
-      expect(actualBody.success).toBe(true);
-      expect(actualBody).toHaveProperty('message');
-      expect(actualBody.message).toBe(userConstants.userSignUpSuccessful);
-      expect(actualBody).toHaveProperty('data');
-      done();
-    });
+    const response = await sendUserSignUpReq(userSignUpPayload);
+    const actualBody = response.body as apiResType;
+    expect(actualBody.code).toBe(201);
+    expect(actualBody.success).toBe(true);
+    expect(actualBody).toHaveProperty('message');
+    expect(actualBody.message).toBe(userConstants.userSignUpSuccessful);
+    expect(actualBody).toHaveProperty('data');
   });
 
-  it('saves the user in database', (done) => {
+  it('saves the user in database', async () => {
     const userSignUpPayload: userSignUpType = generateUserDetails();
-    sendUserSignUpReq(userSignUpPayload).then(async (_response) => {
-      const actualUser = await getUserByUsername(userSignUpPayload.username);
-      expect(actualUser).toBeDefined();
-      done();
-    });
+    await sendUserSignUpReq(userSignUpPayload);
+    const actualUser = await getUserByUsername(userSignUpPayload.username);
+    expect(actualUser).toBeDefined();
   });
 
-  it('saves the username and email in database', (done) => {
+  it('saves the username and email in database', async () => {
     const userSignUpPayload: userSignUpType = generateUserDetails();
-    sendUserSignUpReq(userSignUpPayload).then(async (_response) => {
-      const actualUser = await getUserByUsername(userSignUpPayload.username);
-      expect(actualUser?.username).toBe(userSignUpPayload.username);
-      expect(actualUser?.email).toBe(userSignUpPayload.email);
-      done();
-    });
+    await sendUserSignUpReq(userSignUpPayload);
+    const actualUser = await getUserByUsername(userSignUpPayload.username);
+    expect(actualUser?.username).toBe(userSignUpPayload.username);
+    expect(actualUser?.email).toBe(userSignUpPayload.email);
   });
 
-  it('hashes the password in database', (done) => {
+  it('hashes the password in database', async () => {
     const userSignUpPayload: userSignUpType = generateUserDetails();
-    sendUserSignUpReq(userSignUpPayload).then(async (response) => {
-      const actualUser = await getUserByUsername(userSignUpPayload.username);
-      expect(actualUser?.password).not.toBe(decode(userSignUpPayload.password));
-      expect(actualUser?.password).not.toBe(encode(userSignUpPayload.password));
-      done();
-    });
+    await sendUserSignUpReq(userSignUpPayload);
+    const actualUser = await getUserByUsername(userSignUpPayload.username);
+    expect(actualUser?.password).not.toBe(decode(userSignUpPayload.password));
+    expect(actualUser?.password).not.toBe(encode(userSignUpPayload.password));
   });
 
-  it('throws error when password is not encoded', (done) => {
+  it('throws error when password is not encoded', async () => {
     const userSignUpPayload: userSignUpType = generateUserDetails();
     userSignUpPayload.password = 'Admin@123';
-    sendUserSignUpReqWithoutEncoding(userSignUpPayload).then(
-      async (response) => {
-        const actualBody = response.body;
-        expect(actualBody.name).toBe('InvalidCharacterError');
-        expect(actualBody).toHaveProperty('errors');
-        done();
-      }
-    );
+    const response = await sendUserSignUpReqWithoutEncoding(userSignUpPayload);
+    const actualBody = response.body;
+    expect(actualBody.name).toBe('InvalidCharacterError');
+    expect(actualBody).toHaveProperty('errors');
   });
 });
